@@ -141,8 +141,8 @@ function mainResponse() {
       responseText = generateMemoryInsult();
     } else {
       const replies = responses[currentMood];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      responseText = `[${currentMood}] ${reply}`;
+const reply = replies[Math.floor(Math.random() * replies.length)];
+responseText = reply; // No [MOOD] tag!
     }
   }
 
