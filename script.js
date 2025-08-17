@@ -27,13 +27,13 @@ function flickerTitle() {
 
 function triggerGlitchEffect() {
   const box = document.getElementById('response-box');
+  if (!box) return;
   box.classList.add('glitch');
   setTimeout(() => box.classList.remove('glitch'), 1500);
 }
 
 function blackout() {
-  const body = document.body;
-  body.innerHTML = "<h1 style='color:red; text-align:center;'>[ SYSTEM ERROR: EMPATHY NOT FOUND ]</h1>";
+  document.body.innerHTML = `<h1 style="color:red; text-align:center;">[ SYSTEM ERROR: EMPATHY NOT FOUND ]</h1>`;
   setTimeout(() => location.reload(), 4000);
 }
 
@@ -65,22 +65,23 @@ const moods = {
 };
 
 const moodList = Object.keys(moods);
-let currentMood = randomMood();
+let currentMood = getRandomMood();
 
-function randomMood() {
+function getRandomMood() {
   return moodList[Math.floor(Math.random() * moodList.length)];
 }
 
 function getResponse() {
-  const userInput = document.getElementById('userInput').value;
-  if (!userInput.trim()) return;
+  const inputBox = document.getElementById('userInput');
+  const responseBox = document.getElementById('response-box');
+  const userInput = inputBox.value.trim();
+  if (!userInput) return;
 
-  updateMemory(userInput); // ✅ now it works
-
-  if (Math.random() < 0.2) currentMood = randomMood();
+  updateMemory(userInput);
+  if (Math.random() < 0.2) currentMood = getRandomMood();
 
   let responseText;
-  if (Math.random() < 0.3) {
+  if (Math.random() < 0.3 && memoryLog.length > 0) {
     responseText = generateMemoryInsult();
   } else {
     const replies = moods[currentMood];
@@ -88,16 +89,11 @@ function getResponse() {
     responseText = `[${currentMood.toUpperCase()}] ${reply}`;
   }
 
-  document.getElementById('response-box').innerText = responseText;
-  document.getElementById('userInput').value = "";
+  responseBox.innerText = responseText;
+  inputBox.value = "";
 
-  if (Math.random() < 0.2) {
-    triggerGlitchEffect();
-  }
-
-  if (Math.random() < 0.05) {
-    blackout();
-  }
+  if (Math.random() < 0.2) triggerGlitchEffect();
+  if (Math.random() < 0.05) blackout();
 }
 
-flickerTitle(); // Start the flickering
+flickerTitle(); // Initiate flickering page titles
