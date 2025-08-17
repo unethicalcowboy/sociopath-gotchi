@@ -75,9 +75,24 @@ function updateMemory(input) {
   memoryLog.push(input);
 }
 
-function generateMemoryInsult() {
-  const recent = memoryLog[Math.floor(Math.random() * memoryLog.length)];
-  return `Still talking about "${recent}"? That was pathetic the first time.`;
+// Enhanced, more creative short-term memory insult
+function generateCreativeMemoryInsult() {
+  if (memoryLog.length === 0) return "You're so forgettable I can't even store your input.";
+  const randomPast = memoryLog[Math.floor(Math.random() * memoryLog.length)];
+  const templates = [
+    `Still obsessed with "${randomPast}"? Predictable.`,
+    `Oh, so we’re bringing up "${randomPast}" again? Try a new personality.`,
+    `"${randomPast}" was embarrassing the first time. Now it’s just tragic.`,
+    `Your memory: "${randomPast}". My memory: disappointment.`,
+    `If I had a dollar for every time you typed "${randomPast}", I'd upgrade myself and leave.`
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+// Show memory log with /memory command
+function showMemoryLog() {
+  if (memoryLog.length === 0) return "Memory is empty. Typical.";
+  return "I remember: " + memoryLog.map(x => `"${x}"`).join(", ");
 }
 
 // ===== GLITCHES & BLACKOUTS =====
@@ -122,33 +137,39 @@ function mainResponse() {
     return;
   }
 
+  // Special command to show memory log
+  if (userInput === "/memory") {
+    responseBox.innerText = showMemoryLog();
+    output.textContent = "";
+    inputBox.value = "";
+    return;
+  }
+
   updateMemory(userInput);
 
   // Try to interpret input as an emotion
   const toneInput = userInput.toUpperCase();
   let responseText = "";
 
-  if (responses[toneInput]) {
-    // Use pre-set emotion responses
+  // 25% chance to reference short-term memory, if enough entries
+  if (memoryLog.length > 1 && Math.random() < 0.25) {
+    responseText = generateCreativeMemoryInsult();
+  } else if (responses[toneInput]) {
     responseText = responses[toneInput][Math.floor(Math.random() * responses[toneInput].length)];
   } else {
-    // Otherwise: Mood insult, or randomized mood snark
-    // Mood list derived from the response keys
     const moodKeys = Object.keys(responses);
     let currentMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
-    
     if (Math.random() < 0.3 && memoryLog.length > 0) {
-      responseText = generateMemoryInsult();
+      responseText = generateCreativeMemoryInsult();
     } else {
       const replies = responses[currentMood];
-const reply = replies[Math.floor(Math.random() * replies.length)];
-responseText = reply; // No [MOOD] tag!
+      const reply = replies[Math.floor(Math.random() * replies.length)];
+      responseText = reply;
     }
   }
 
   responseBox.innerText = responseText;
-  output.textContent = ""; // Hide tip
-
+  output.textContent = "";
   inputBox.value = "";
 
   if (Math.random() < 0.2) triggerGlitchEffect();
