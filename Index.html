@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sociopath-Gotchi</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Sociopath-gotchi</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Sociopath-Gotchi</h1>
-  <p id="status">It's watching you.</p>
-  <button onclick="interact()">Poke It</button>
-
+  <div id="container">
+    <h1>Sociopath-gotchi</h1>
+    <div id="response-box">Talk to me, meatbag.</div>
+    <input type="text" id="userInput" placeholder="Say something...">
+    <button onclick="getResponse()">Submit</button>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
