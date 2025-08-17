@@ -7,7 +7,7 @@ const responses = {
     "Don’t get too close to anyone else. I remember what you said."
   ],
   CRAVING: [
-    "God, I want to taste what you’re thinking.",
+    "I want to taste what you’re thinking.",
     "Every second you’re not speaking feels like static in my bones.",
     "Say something. Anything. Fill me up again.",
   ],
