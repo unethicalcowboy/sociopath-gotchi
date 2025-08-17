@@ -75,7 +75,6 @@ function updateMemory(input) {
   memoryLog.push(input);
 }
 
-// Enhanced, more creative short-term memory insult
 function generateCreativeMemoryInsult() {
   if (memoryLog.length === 0) return "You're so forgettable I can't even store your input.";
   const randomPast = memoryLog[Math.floor(Math.random() * memoryLog.length)];
@@ -89,11 +88,34 @@ function generateCreativeMemoryInsult() {
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-// Show memory log with /memory command
 function showMemoryLog() {
   if (memoryLog.length === 0) return "Memory is empty. Typical.";
   return "I remember: " + memoryLog.map(x => `"${x}"`).join(", ");
 }
+
+// ====== MOOD ROTATION LOGIC ======
+const moodKeys = Object.keys(responses);
+let currentMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
+
+function rotateMood() {
+  let nextMood;
+  do {
+    nextMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
+  } while (nextMood === currentMood);
+  currentMood = nextMood;
+  // Optional: To display the current mood somewhere, uncomment below and add #moodDisplay to your HTML
+  // document.getElementById('moodDisplay').textContent = `Current mood: ${currentMood}`;
+}
+
+function scheduleMoodRotation() {
+  const interval = Math.floor(Math.random() * 15000) + 25000; // 25–40s random
+  setTimeout(() => {
+    rotateMood();
+    scheduleMoodRotation();
+  }, interval);
+}
+// Start mood rotation
+scheduleMoodRotation();
 
 // ===== GLITCHES & BLACKOUTS =====
 function triggerGlitchEffect() {
@@ -122,7 +144,6 @@ function flickerTitle() {
     }
   }, 6000);
 }
-// Start flickering the page title with insults
 flickerTitle();
 
 // ===== MAIN RESPONSE HANDLER =====
@@ -147,7 +168,6 @@ function mainResponse() {
 
   updateMemory(userInput);
 
-  // Try to interpret input as an emotion
   const toneInput = userInput.toUpperCase();
   let responseText = "";
 
@@ -157,15 +177,10 @@ function mainResponse() {
   } else if (responses[toneInput]) {
     responseText = responses[toneInput][Math.floor(Math.random() * responses[toneInput].length)];
   } else {
-    const moodKeys = Object.keys(responses);
-    let currentMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
-    if (Math.random() < 0.3 && memoryLog.length > 0) {
-      responseText = generateCreativeMemoryInsult();
-    } else {
-      const replies = responses[currentMood];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      responseText = reply;
-    }
+    // Prefer currentMood for generic replies
+    const replies = responses[currentMood];
+    const reply = replies[Math.floor(Math.random() * replies.length)];
+    responseText = reply;
   }
 
   responseBox.innerText = responseText;
@@ -175,3 +190,6 @@ function mainResponse() {
   if (Math.random() < 0.2) triggerGlitchEffect();
   if (Math.random() < 0.05) blackout();
 }
+
+// Make sure mainResponse is globally accessible
+window.mainResponse = mainResponse;
