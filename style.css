@@ -1,3 +1,4 @@
+/* Basic styles */
 body {
   background: #111;
   color: #e0e0e0;
@@ -13,4 +14,60 @@ body {
   background-color: #1e1e1e;
   border: 2px solid #333;
   border-radius: 10px;
+}
+
+/* Input & Button */
+input[type="text"] {
+  width: 90%;
+  padding: 0.5rem;
+  background-color: #222;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  border-radius: 5px;
+  margin-top: 1rem;
+  font-family: monospace;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #666;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #444;
+}
+
+/* Glitch effect */
+.glitch {
+  animation: glitch 0.3s infinite;
+  color: #ff4f4f;
+  text-shadow:
+    2px 2px #0ff,
+    -2px -2px #f0f;
+}
+
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
 }
