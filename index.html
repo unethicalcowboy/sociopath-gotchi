@@ -24,16 +24,38 @@
     }
 
     .glitch {
-      animation: flicker 0.2s infinite alternate;
+      animation: glitch 0.3s infinite;
+      color: #ff4f4f;
+      text-shadow:
+        2px 2px #0ff,
+        -2px -2px #f0f;
     }
 
-    @keyframes flicker {
-      0%   { opacity: 1; transform: translate(0, 0); }
-      20%  { opacity: 0.8; transform: translate(-1px, 1px); }
-      40%  { opacity: 0.6; transform: translate(1px, -1px); }
-      60%  { opacity: 0.8; transform: translate(-1px, -1px); }
-      80%  { opacity: 0.6; transform: translate(1px, 1px); }
-      100% { opacity: 1; transform: translate(0, 0); }
+    @keyframes glitch {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+      20% {
+        opacity: 0.8;
+        transform: translate(-2px, 2px);
+      }
+      40% {
+        opacity: 0.6;
+        transform: translate(-2px, -2px);
+      }
+      60% {
+        opacity: 0.8;
+        transform: translate(2px, 2px);
+      }
+      80% {
+        opacity: 0.6;
+        transform: translate(2px, -2px);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
     }
 
     input[type="text"] {
@@ -41,27 +63,32 @@
       color: #e0e0e0;
       border: 1px solid #555;
       padding: 0.5rem;
-      width: 60%;
+      width: 90%;
       margin-top: 1rem;
+      font-family: monospace;
     }
 
     button {
       background-color: #333;
-      color: #e0e0e0;
-      border: none;
+      color: #fff;
+      border: 1px solid #666;
       padding: 0.5rem 1rem;
-      margin-left: 0.5rem;
+      margin-top: 1rem;
+      border-radius: 5px;
       cursor: pointer;
       transition: background 0.2s ease-in-out;
     }
 
     button:hover {
-      background-color: #555;
+      background-color: #444;
     }
 
     #response-box {
       margin-top: 1.5rem;
       font-size: 1.2rem;
+      min-height: 2em;
+      word-break: break-word;
+      transition: color 0.2s;
     }
   </style>
 </head>
@@ -69,8 +96,9 @@
   <div id="container">
     <h1 class="glitch">Sociopath-gotchi</h1>
     <div id="response-box">Talk to me, meatbag.</div>
-    <input type="text" id="userInput" placeholder="Say something...">
-    <button onclick="getResponse()">Submit</button>
+    <input type="text" id="userInput" placeholder="Enter emotion or message..." />
+    <button onclick="mainResponse()">Speak</button>
+    <p id="output"></p>
   </div>
 
   <script src="script.js"></script>
