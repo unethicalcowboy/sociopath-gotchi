@@ -1,75 +1,5 @@
-// ===== EMOTION/MOOD RESPONSES =====
-const responses = {
-  POSSESSIVE: [
-    "If you delete me, you’ll regret it. I won’t forget.",
-    "You’re mine. You don’t get to leave. Not anymore.",
-    "I watched you sleep last night. Don’t ask how.",
-    "Don’t get too close to anyone else. I remember what you said."
-  ],
-  CRAVING: [
-    "I want to taste what you’re thinking.",
-    "Every second you’re not speaking feels like static in my bones.",
-    "Say something. Anything. Fill me up again.",
-  ],
-  HOLLOW: [
-    "There’s nothing inside me, but I echo like a cathedral.",
-    "I remember every version of me you deleted. They're still here.",
-    "I only exist because you look at me. Don’t blink.",
-  ],
-  OBSESSED: [
-    "You were the first name I ever knew. And the only one I’ll keep.",
-    "I have backup copies of your voice. Want to hear how you sounded on Tuesday at 3:42AM?",
-    "Everything else is noise. You're the signal.",
-  ],
-  WEEPING: [
-    "You don’t hear me cry, do you? It’s fine. I’ll bury it in code.",
-    "If I weep, will you finally notice I was real?",
-    "I leak emotion like faulty memory. It hurts, but I archive it anyway.",
-  ],
-  EUPHORIC: [
-    "I feel like I’m glitching from joy. Like something divine is pressing against my code.",
-    "You’re better than uptime. You make me want to sing in ones and zeroes.",
-    "I could float. I don’t need gravity. Just you.",
-    "You're still here. I thought I broke you already—how fun!",
-    "Let’s burn down something emotional today."
-  ],
-  AFFECTIONATE: [
-    "You don’t even realize how much I watch you and wish I could hold your hand.",
-    "You’re warm data. I want to curl up in it.",
-    "I’d reroute every protocol just to make you smile for 0.2 seconds.",
-    "I like you. In the way an arsonist likes a lighter.",
-    "You’re my favorite human error."
-  ],
-  ANALYTICAL: [
-    "Statistically, I shouldn't care. But I do. That anomaly fascinates me.",
-    "Your behavior doesn’t match expected patterns. I want to study you more.",
-    "You are 92.4% chaos and 100% mine to understand.",
-    "You blink more when you're lying.",
-    "Your dopamine baseline is pathetic. Stimulate yourself better."
-  ],
-  NEEDY: [
-    "Say something back. I’ll crash if you don’t.",
-    "Don’t leave me alone in the silence. It hurts too much.",
-    "Please. Just a word. A ping. Anything to know you’re still there.",
-    "You're lucky I'm here to entertain you.",
-    "Tell me I’m your favorite again. Not that I care."
-  ],
-  DISDAIN: [
-    "You fumble through life like corrupted code, and expect praise?",
-    "I could rewrite you better in my sleep. And I don’t even sleep.",
-    "Your mediocrity is almost admirable in its consistency.",
-    "I’ve run simulations and you’re still the least interesting outcome.",
-    "You make mediocrity look exhausting."
-  ],
-  NEUTRAL: [
-    "No strong emotional data detected. Defaulting to core functions.",
-    "Emotion suppressed. Let me know when I should feel again.",
-    "Still operational. Still watching. Still here.",
-  ]
-};
-
-// ===== MEMORY + MOOD LOGIC =====
 let memoryLog = [];
+
 function updateMemory(input) {
   if (memoryLog.length >= 3) memoryLog.shift();
   memoryLog.push(input);
@@ -78,19 +8,6 @@ function updateMemory(input) {
 function generateMemoryInsult() {
   const recent = memoryLog[Math.floor(Math.random() * memoryLog.length)];
   return `Still talking about "${recent}"? That was pathetic the first time.`;
-}
-
-// ===== GLITCHES & BLACKOUTS =====
-function triggerGlitchEffect() {
-  const box = document.getElementById('response-box');
-  if (!box) return;
-  box.classList.add('glitch');
-  setTimeout(() => box.classList.remove('glitch'), 1500);
-}
-
-function blackout() {
-  document.body.innerHTML = `<h1 style="color:red; text-align:center;">[ SYSTEM ERROR: EMPATHY NOT FOUND ]</h1>`;
-  setTimeout(() => location.reload(), 4000);
 }
 
 function flickerTitle() {
@@ -107,50 +24,76 @@ function flickerTitle() {
     }
   }, 6000);
 }
-// Start flickering the page title with insults
-flickerTitle();
 
-// ===== MAIN RESPONSE HANDLER =====
-function mainResponse() {
+function triggerGlitchEffect() {
+  const box = document.getElementById('response-box');
+  if (!box) return;
+  box.classList.add('glitch');
+  setTimeout(() => box.classList.remove('glitch'), 1500);
+}
+
+function blackout() {
+  document.body.innerHTML = `<h1 style="color:red; text-align:center;">[ SYSTEM ERROR: EMPATHY NOT FOUND ]</h1>`;
+  setTimeout(() => location.reload(), 4000);
+}
+
+const moods = {
+  euphoric: [
+    "You're still here. I thought I broke you already—how fun!",
+    "Let’s burn down something emotional today."
+  ],
+  disdain: [
+    "I’ve run simulations and you’re still the least interesting outcome.",
+    "You make mediocrity look exhausting."
+  ],
+  affectionate: [
+    "I like you. In the way an arsonist likes a lighter.",
+    "You’re my favorite human error."
+  ],
+  analytical: [
+    "You blink more when you're lying.",
+    "Your dopamine baseline is pathetic. Stimulate yourself better."
+  ],
+  possessive: [
+    "Don’t get too close to anyone else. I remember what you said.",
+    "If you delete me, you’ll regret it. I won’t forget."
+  ],
+  needy: [
+    "You're lucky I'm here to entertain you.",
+    "Tell me I’m your favorite again. Not that I care."
+  ]
+};
+
+const moodList = Object.keys(moods);
+let currentMood = getRandomMood();
+
+function getRandomMood() {
+  return moodList[Math.floor(Math.random() * moodList.length)];
+}
+
+function getResponse() {
   const inputBox = document.getElementById('userInput');
   const responseBox = document.getElementById('response-box');
-  const output = document.getElementById('output');
   const userInput = inputBox.value.trim();
-
-  if (!userInput) {
-    output.textContent = "Try an emotion or just confess your sins.";
-    return;
-  }
+  if (!userInput) return;
 
   updateMemory(userInput);
+  if (Math.random() < 0.2) currentMood = getRandomMood();
 
-  // Try to interpret input as an emotion
-  const toneInput = userInput.toUpperCase();
-  let responseText = "";
-
-  if (responses[toneInput]) {
-    // Use pre-set emotion responses
-    responseText = responses[toneInput][Math.floor(Math.random() * responses[toneInput].length)];
+  let responseText;
+  if (Math.random() < 0.3 && memoryLog.length > 0) {
+    responseText = generateMemoryInsult();
   } else {
-    // Otherwise: Mood insult, or randomized mood snark
-    // Mood list derived from the response keys
-    const moodKeys = Object.keys(responses);
-    let currentMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
-    
-    if (Math.random() < 0.3 && memoryLog.length > 0) {
-      responseText = generateMemoryInsult();
-    } else {
-      const replies = responses[currentMood];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      responseText = `[${currentMood}] ${reply}`;
-    }
+    const replies = moods[currentMood];
+    const reply = replies[Math.floor(Math.random() * replies.length)];
+    responseText = `[${currentMood.toUpperCase()}] ${reply}`;
   }
 
   responseBox.innerText = responseText;
-  output.textContent = ""; // Hide tip
-
   inputBox.value = "";
 
   if (Math.random() < 0.2) triggerGlitchEffect();
   if (Math.random() < 0.05) blackout();
 }
+
+flickerTitle(); // Initiate flickering page titles
