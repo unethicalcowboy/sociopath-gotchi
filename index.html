@@ -4,14 +4,47 @@
   <meta charset="UTF-8">
   <title>Sociopath-gotchi</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Optional fallback if style.css fails */
+    body {
+      background: #111;
+      color: #e0e0e0;
+      font-family: monospace;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #container {
+      max-width: 600px;
+      margin: auto;
+      padding: 2rem;
+      background-color: #1e1e1e;
+      border: 2px solid #333;
+      border-radius: 10px;
+    }
+
+    .glitch {
+      animation: flicker 0.2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; transform: translate(0, 0); }
+      20% { opacity: 0.8; transform: translate(-1px, 1px); }
+      40% { opacity: 0.6; transform: translate(1px, -1px); }
+      60% { opacity: 0.8; transform: translate(-1px, -1px); }
+      80% { opacity: 0.6; transform: translate(1px, 1px); }
+      100% { opacity: 1; transform: translate(0, 0); }
+    }
+  </style>
 </head>
 <body>
   <div id="container">
-    <h1>Sociopath-gotchi</h1>
+    <h1 class="glitch">Sociopath-gotchi</h1>
     <div id="response-box">Talk to me, meatbag.</div>
     <input type="text" id="userInput" placeholder="Say something...">
     <button onclick="getResponse()">Submit</button>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
