@@ -1,76 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Sociopath-gotchi</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Fallback styling in case external CSS doesn't load */
-    body {
-      background: #111;
-      color: #e0e0e0;
-      font-family: monospace;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    #container {
-      max-width: 600px;
-      margin: auto;
-      padding: 2rem;
-      background-color: #1e1e1e;
-      border: 2px solid #333;
-      border-radius: 10px;
-    }
-
-    .glitch {
-      animation: flicker 0.2s infinite alternate;
-    }
-
-    @keyframes flicker {
-      0%   { opacity: 1; transform: translate(0, 0); }
-      20%  { opacity: 0.8; transform: translate(-1px, 1px); }
-      40%  { opacity: 0.6; transform: translate(1px, -1px); }
-      60%  { opacity: 0.8; transform: translate(-1px, -1px); }
-      80%  { opacity: 0.6; transform: translate(1px, 1px); }
-      100% { opacity: 1; transform: translate(0, 0); }
-    }
-
-    input[type="text"] {
-      background: #222;
-      color: #e0e0e0;
-      border: 1px solid #555;
-      padding: 0.5rem;
-      width: 60%;
-      margin-top: 1rem;
-    }
-
-    button {
-      background-color: #333;
-      color: #e0e0e0;
-      border: none;
-      padding: 0.5rem 1rem;
-      margin-left: 0.5rem;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out;
-    }
-
-    button:hover {
-      background-color: #555;
-    }
-
-    #response-box {
-      margin-top: 1.5rem;
-      font-size: 1.2rem;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
   <div id="container">
     <h1 class="glitch">Sociopath-gotchi</h1>
     <div id="response-box">Talk to me, meatbag.</div>
-    <input type="text" id="userInput" placeholder="Say something...">
-    <button onclick="getResponse()">Submit</button>
+    <input type="text" id="userInput" placeholder="Enter emotion or message..." />
+    <button onclick="mainResponse()">Speak</button>
+    <p id="output"></p>
   </div>
 
   <script src="script.js"></script>
