@@ -1,168 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Sociopath-gotchi</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Fallback styling in case external CSS doesn't load */
-    body {
-      background: #111;
-      color: #e0e0e0;
-      font-family: monospace;
-      text-align: center;
-      padding: 2rem;
-    }
-
-    #container {
-      max-width: 600px;
-      margin: auto;
-      padding: 2rem;
-      background-color: #1e1e1e;
-      border: 2px solid #333;
-      border-radius: 10px;
-    }
-
-    .glitch {
-      animation: glitch 0.3s infinite;
-      color: #ff4f4f;
-      text-shadow:
-        2px 2px #0ff,
-        -2px -2px #f0f;
-    }
-
-    @keyframes glitch {
-      0% {
-        opacity: 1;
-        transform: translate(0, 0);
-      }
-      20% {
-        opacity: 0.8;
-        transform: translate(-2px, 2px);
-      }
-      40% {
-        opacity: 0.6;
-        transform: translate(-2px, -2px);
-      }
-      60% {
-        opacity: 0.8;
-        transform: translate(2px, 2px);
-      }
-      80% {
-        opacity: 0.6;
-        transform: translate(2px, -2px);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(0, 0);
-      }
-    }
-
-    input[type="text"] {
-      background: #222;
-      color: #e0e0e0;
-      border: 1px solid #555;
-      padding: 0.5rem;
-      width: 90%;
-      margin-top: 1rem;
-      font-family: monospace;
-    }
-
-    button {
-      background-color: #333;
-      color: #fff;
-      border: 1px solid #666;
-      padding: 0.5rem 1rem;
-      margin-top: 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out;
-    }
-
-    button:hover {
-      background-color: #444;
-    }
-
-    #response-box {
-      margin-top: 1.5rem;
-      font-size: 1.2rem;
-      min-height: 2em;
-      word-break: break-word;
-      transition: color 0.2s;
-    }
-        /* ===== STATUS CARD ===== */
-    #status-card {
-      margin: 1.5rem auto 1rem;
-      padding: 1rem 1.5rem;
-      border-radius: 8px;
-      background: #151515;
-      border: 1px solid #333;
-      text-align: left;
-      font-size: 0.95rem;
-    }
-
-    .status-name {
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 0.75rem;
-      color: #ff4f4f;
-    }
-
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 0.25rem 0;
-    }
-
-    .status-label {
-      color: #888;
-    }
-
-    .status-value {
-      font-weight: 600;
-      color: #e0e0e0;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="container">
     <h1 class="glitch">Sociopath-gotchi</h1>
 
-    <!-- STATUS CARD -->
+    <!-- Status card -->
     <div id="status-card">
-      <div class="status-name">sociopath-gotchi</div>
-
-      <div class="status-row">
-        <span class="status-label">Mood:</span>
-        <span id="moodDisplay" class="status-value">NEUTRAL</span>
+      <div id="pet-header">
+        <span id="pet-name">SOCIOPATH-GOTCHI</span>
+        <span id="mood-display">NEUTRAL</span>
       </div>
 
       <div class="status-row">
-        <span class="status-label">Hunger:</span>
-        <span id="hungerStat" class="status-value">50</span>
+        <span class="label">Hunger:</span>
+        <span id="hunger-display" class="value">50</span>
       </div>
-
       <div class="status-row">
-        <span class="status-label">Boredom:</span>
-        <span id="boredomStat" class="status-value">40</span>
+        <span class="label">Boredom:</span>
+        <span id="boredom-display" class="value">40</span>
       </div>
-
       <div class="status-row">
-        <span class="status-label">Affection:</span>
-        <span id="affectionStat" class="status-value">30</span>
+        <span class="label">Affection:</span>
+        <span id="affection-display" class="value">30</span>
       </div>
     </div>
-    <!-- END STATUS CARD -->
 
+    <!-- Main response area -->
     <div id="response-box">Talk to me, meatbag.</div>
-    <input type="text" id="userInput" placeholder="Enter emotion or message..." />
-    <button onclick="mainResponse()">Speak</button>
+
+    <input
+      type="text"
+      id="userInput"
+      placeholder="Enter emotion or message..."
+    />
+    <button id="speak-button">Speak</button>
+
     <p id="output"></p>
-</div>
+  </div>
 
   <script src="script.js"></script>
 </body>
 </html>
-
-
