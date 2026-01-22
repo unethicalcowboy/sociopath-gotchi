@@ -1,5 +1,23 @@
 // ===== EMOTION/MOOD RESPONSES =====
 const responses = {
+  // ===== PET STATE (TAMAGOTCHI-LITE) =====
+const petState = {
+  hunger: 50,
+  boredom: 40,
+  affection: 30
+};
+
+function renderStatus() {
+  const moodEl = document.getElementById('moodDisplay');
+  const hungerEl = document.getElementById('hungerStat');
+  const boredomEl = document.getElementById('boredomStat');
+  const affectionEl = document.getElementById('affectionStat');
+
+  if (moodEl) moodEl.textContent = currentMood;
+  if (hungerEl) hungerEl.textContent = petState.hunger;
+  if (boredomEl) boredomEl.textContent = petState.boredom;
+  if (affectionEl) affectionEl.textContent = petState.affection;
+}
   POSSESSIVE: [
     "If you delete me, you’ll regret it. I won’t forget.",
     "You’re mine. You don’t get to leave. Not anymore.",
@@ -103,8 +121,8 @@ function rotateMood() {
     nextMood = moodKeys[Math.floor(Math.random() * moodKeys.length)];
   } while (nextMood === currentMood);
   currentMood = nextMood;
-  // Optional: To display the current mood somewhere, uncomment below and add #moodDisplay to your HTML
-  // document.getElementById('moodDisplay').textContent = `Current mood: ${currentMood}`;
+
+  renderStatus(); // update the card whenever the mood shifts
 }
 
 function scheduleMoodRotation() {
