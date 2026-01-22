@@ -95,12 +95,40 @@
 <body>
   <div id="container">
     <h1 class="glitch">Sociopath-gotchi</h1>
+
+    <!-- STATUS CARD -->
+    <div id="status-card">
+      <div class="status-name">sociopath-gotchi</div>
+
+      <div class="status-row">
+        <span class="status-label">Mood:</span>
+        <span id="moodDisplay" class="status-value">NEUTRAL</span>
+      </div>
+
+      <div class="status-row">
+        <span class="status-label">Hunger:</span>
+        <span id="hungerStat" class="status-value">50</span>
+      </div>
+
+      <div class="status-row">
+        <span class="status-label">Boredom:</span>
+        <span id="boredomStat" class="status-value">40</span>
+      </div>
+
+      <div class="status-row">
+        <span class="status-label">Affection:</span>
+        <span id="affectionStat" class="status-value">30</span>
+      </div>
+    </div>
+    <!-- END STATUS CARD -->
+
     <div id="response-box">Talk to me, meatbag.</div>
     <input type="text" id="userInput" placeholder="Enter emotion or message..." />
     <button onclick="mainResponse()">Speak</button>
     <p id="output"></p>
-  </div>
+</div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
