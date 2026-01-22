@@ -1,54 +1,42 @@
-/* Basic styles */
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background: #111;
-  color: #e0e0e0;
-  font-family: monospace;
-  text-align: center;
+  margin: 0;
   padding: 2rem;
+  background: #050505;
+  color: #e0e0e0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Mono",
+    Menlo, monospace;
+  display: flex;
+  justify-content: center;
 }
 
 #container {
-  max-width: 600px;
-  margin: auto;
+  width: 100%;
+  max-width: 720px;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 12px;
   padding: 2rem;
-  background-color: #1e1e1e;
-  border: 2px solid #333;
-  border-radius: 10px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
 }
 
-/* Input & Button */
-input[type="text"] {
-  width: 90%;
-  padding: 0.5rem;
-  background-color: #222;
-  color: #e0e0e0;
-  border: 1px solid #555;
-  border-radius: 5px;
-  margin-top: 1rem;
-  font-family: monospace;
+/* title */
+
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 2rem;
+  text-align: center;
 }
 
-button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #333;
-  color: #fff;
-  border: 1px solid #666;
-  border-radius: 5px;
-  cursor: pointer;
-}
+/* glitch effect (same vibe as before) */
 
-button:hover {
-  background-color: #444;
-}
-
-/* Glitch effect */
 .glitch {
   animation: glitch 0.3s infinite;
   color: #ff4f4f;
-  text-shadow:
-    2px 2px #0ff,
-    -2px -2px #f0f;
+  text-shadow: 2px 2px #0ff, -2px -2px #f0f;
 }
 
 @keyframes glitch {
@@ -76,4 +64,97 @@ button:hover {
     opacity: 1;
     transform: translate(0, 0);
   }
+}
+
+/* status card */
+
+#status-card {
+  margin: 0 auto 2rem;
+  padding: 1.2rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #181818;
+  max-width: 640px;
+}
+
+#pet-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+#pet-name {
+  letter-spacing: 2px;
+  color: #ff4f4f;
+}
+
+#mood-display {
+  font-weight: 700;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.label {
+  color: #c0c0c0;
+}
+
+.value {
+  color: #ffffff;
+}
+
+/* main text + input */
+
+#response-box {
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  min-height: 2.2em;
+  text-align: center;
+}
+
+#userInput {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #222;
+  color: #e0e0e0;
+  font-family: inherit;
+}
+
+#userInput::placeholder {
+  color: #777;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 0.55rem 1.4rem;
+  border-radius: 6px;
+  border: 1px solid #666;
+  background: #333;
+  color: #f5f5f5;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease-in-out, transform 0.05s ease-in-out;
+}
+
+button:hover {
+  background: #444;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+#output {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #aaaaaa;
 }
