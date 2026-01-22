@@ -210,4 +210,3 @@ function mainResponse() {
 }
 
 // Make sure mainResponse is globally accessible
-window.mainResponse = mainResponse;
