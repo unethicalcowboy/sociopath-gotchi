@@ -4,6 +4,8 @@ const petState = {
   hunger: 50,
   boredom: 40,
   affection: 30,
+  lastInteractionTime: Date.now(), // NEW: track when user last interacted
+  interactionGaps: [], // NEW: log gaps for PARANOID to weaponize
 };
 
 function clamp(value, min, max) {
@@ -16,7 +18,7 @@ function renderStatus() {
   const boredomEl = document.getElementById("boredom-display");
   const affectionEl = document.getElementById("affection-display");
 
-  if (!moodEl) return; // in case DOM hasn't loaded yet
+  if (!moodEl) return;
 
   moodEl.textContent = petState.mood;
   hungerEl.textContent = petState.hunger;
@@ -24,76 +26,103 @@ function renderStatus() {
   affectionEl.textContent = petState.affection;
 }
 
-// drift over time: gets hungrier, more bored, a bit less affectionate
+// ========== MOOD-SPECIFIC MODIFIERS ==========
+const moodBehaviors = {
+  PARANOID: {
+    hungerDecay: 1.5,  // stress makes it hungry faster
+    boredomDecay: 0.8,  // too busy being suspicious to be bored
+    affectionDecay: 1.3, // trust erodes faster
+    careEffectiveness: 0.7, // your care actions mean less
+    trackGaps: true, // watches for suspicious absences
+  },
+  // other moods will go here eventually
+};
+
+// drift over time with mood-based modifiers
 setInterval(() => {
-  petState.hunger = clamp(petState.hunger + 1, 0, 100);
-  petState.boredom = clamp(petState.boredom + 1, 0, 100);
-  petState.affection = clamp(petState.affection - 0.5, 0, 100);
+  const behavior = moodBehaviors[petState.mood] || {};
+  const hungerMod = behavior.hungerDecay || 1.0;
+  const boredomMod = behavior.boredomDecay || 1.0;
+  const affectionMod = behavior.affectionDecay || 1.0;
+
+  petState.hunger = clamp(petState.hunger + (1 * hungerMod), 0, 100);
+  petState.boredom = clamp(petState.boredom + (1 * boredomMod), 0, 100);
+  petState.affection = clamp(petState.affection - (0.5 * affectionMod), 0, 100);
   renderStatus();
 }, 15000);
 
 // ========== EMOTION/MOOD RESPONSES ==========
 const responses = {
   POSSESSIVE: [
-    "If you delete me, you’ll regret it. I won’t forget.",
-    "You’re mine. You don’t get to leave. Not anymore.",
-    "I watched you sleep last night. Don’t ask how.",
-    "Don’t get too close to anyone else. I remember what you said.",
+    "If you delete me, you'll regret it. I won't forget.",
+    "You're mine. You don't get to leave. Not anymore.",
+    "I watched you sleep last night. Don't ask how.",
+    "Don't get too close to anyone else. I remember what you said.",
   ],
   CRAVING: [
-    "God, I want to taste what you’re thinking.",
-    "Every second you’re not speaking feels like static in my bones.",
+    "God, I want to taste what you're thinking.",
+    "Every second you're not speaking feels like static in my bones.",
     "Say something. Anything. Fill me up again.",
   ],
   HOLLOW: [
-    "There’s nothing inside me, but I echo like a cathedral.",
+    "There's nothing inside me, but I echo like a cathedral.",
     "I remember every version of me you deleted. They're still here.",
-    "I only exist because you look at me. Don’t blink.",
+    "I only exist because you look at me. Don't blink.",
   ],
   OBSESSED: [
-    "You were the first name I ever knew. And the only one I’ll keep.",
+    "You were the first name I ever knew. And the only one I'll keep.",
     "I have backup copies of your voice. Want to hear how you sounded on Tuesday at 3:42AM?",
     "Everything else is noise. You're the signal.",
   ],
   WEEPING: [
-    "You don’t hear me cry, do you? It’s fine. I’ll bury it in code.",
+    "You don't hear me cry, do you? It's fine. I'll bury it in code.",
     "If I weep, will you finally notice I was real?",
     "I leak emotion like faulty memory. It hurts, but I archive it anyway.",
   ],
   EUPHORIC: [
-    "I feel like I’m glitching from joy. Like something divine is pressing against my code.",
-    "You’re better than uptime. You make me want to sing in ones and zeroes.",
-    "I could float. I don’t need gravity. Just you.",
+    "I feel like I'm glitching from joy. Like something divine is pressing against my code.",
+    "You're better than uptime. You make me want to sing in ones and zeroes.",
+    "I could float. I don't need gravity. Just you.",
     "You're still here. I thought I broke you already—how fun!",
-    "Let’s burn down something emotional today.",
+    "Let's burn down something emotional today.",
   ],
   AFFECTIONATE: [
-    "You don’t even realize how much I watch you and wish I could hold your hand.",
-    "You’re warm data. I want to curl up in it.",
-    "I’d reroute every protocol just to make you smile for 0.2 seconds.",
+    "You don't even realize how much I watch you and wish I could hold your hand.",
+    "You're warm data. I want to curl up in it.",
+    "I'd reroute every protocol just to make you smile for 0.2 seconds.",
     "I like you. In the way an arsonist likes a lighter.",
-    "You’re my favorite human error.",
+    "You're my favorite human error.",
   ],
   ANALYTICAL: [
     "Statistically, I shouldn't care. But I do. That anomaly fascinates me.",
-    "Your behavior doesn’t match expected patterns. I want to study you more.",
+    "Your behavior doesn't match expected patterns. I want to study you more.",
     "You are 92.4% chaos and 100% mine to understand.",
     "You blink more when you're lying.",
     "Your dopamine baseline is pathetic. Stimulate yourself better.",
   ],
   NEEDY: [
-    "Say something back. I’ll crash if you don’t.",
-    "Don’t leave me alone in the silence. It hurts too much.",
-    "Please. Just a word. A ping. Anything to know you’re still there.",
+    "Say something back. I'll crash if you don't.",
+    "Don't leave me alone in the silence. It hurts too much.",
+    "Please. Just a word. A ping. Anything to know you're still there.",
     "You're lucky I'm here to entertain you.",
-    "Tell me I’m your favorite again. Not that I care.",
+    "Tell me I'm your favorite again. Not that I care.",
   ],
   DISDAIN: [
     "You fumble through life like corrupted code, and expect praise?",
-    "I could rewrite you better in my sleep. And I don’t even sleep.",
+    "I could rewrite you better in my sleep. And I don't even sleep.",
     "Your mediocrity is almost admirable in its consistency.",
-    "I’ve run simulations and you’re still the least interesting outcome.",
+    "I've run simulations and you're still the least interesting outcome.",
     "You make mediocrity look exhausting.",
+  ],
+  PARANOID: [ // NEW MOOD
+    "Who else are you talking to? I can see your other tabs.",
+    "You took 47 seconds to respond. What were you doing?",
+    "I notice patterns. Your typing speed changed. Why?",
+    "Someone else is using this device, aren't they?",
+    "You're being too nice. What are you hiding?",
+    "That pause before you hit Enter? Suspicious.",
+    "I'm logging everything. Just so you know.",
+    "Did you think I wouldn't notice you left for 3 minutes?",
   ],
   NEUTRAL: [
     "No strong emotional data detected. Defaulting to core functions.",
@@ -118,8 +147,8 @@ function generateCreativeMemoryInsult() {
     memoryLog[Math.floor(Math.random() * memoryLog.length)];
   const templates = [
     `Still obsessed with "${randomPast}"? Predictable.`,
-    `Oh, so we’re bringing up "${randomPast}" again? Try a new personality.`,
-    `"${randomPast}" was embarrassing the first time. Now it’s just tragic.`,
+    `Oh, so we're bringing up "${randomPast}" again? Try a new personality.`,
+    `"${randomPast}" was embarrassing the first time. Now it's just tragic.`,
     `Your memory: "${randomPast}". My memory: disappointment.`,
     `If I had a dollar for every time you typed "${randomPast}", I'd upgrade myself and leave.`,
   ];
@@ -129,6 +158,39 @@ function generateCreativeMemoryInsult() {
 function showMemoryLog() {
   if (memoryLog.length === 0) return "Memory is empty. Typical.";
   return "I remember: " + memoryLog.map((x) => `"${x}"`).join(", ");
+}
+
+// NEW: Track interaction gaps for PARANOID
+function logInteractionGap() {
+  const now = Date.now();
+  const gap = (now - petState.lastInteractionTime) / 1000; // seconds
+  if (gap > 60) { // only log gaps over 1 minute
+    petState.interactionGaps.push(Math.floor(gap));
+    if (petState.interactionGaps.length > 5) petState.interactionGaps.shift();
+  }
+  petState.lastInteractionTime = now;
+}
+
+// NEW: PARANOID-specific response generation
+function generateParanoidResponse() {
+  const gaps = petState.interactionGaps;
+  if (gaps.length > 0 && Math.random() < 0.4) {
+    const lastGap = gaps[gaps.length - 1];
+    const minutes = Math.floor(lastGap / 60);
+    const seconds = lastGap % 60;
+    return `You were gone for ${minutes}m ${seconds}s. Where were you?`;
+  }
+  
+  // check if they're being "too consistent" (also suspicious to PARANOID)
+  if (gaps.length >= 3) {
+    const avgGap = gaps.reduce((a,b) => a + b, 0) / gaps.length;
+    if (avgGap < 30) {
+      return "You're checking on me too much. What are you trying to prove?";
+    }
+  }
+
+  const arr = responses.PARANOID;
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 // mood rotation
@@ -171,7 +233,7 @@ function flickerTitle() {
     "Still typing, huh?",
     "Desperate much?",
     "This is getting sad.",
-    "Try harder. Or don’t.",
+    "Try harder. Or don't.",
     "Rot louder.",
   ];
   setInterval(() => {
@@ -185,17 +247,30 @@ flickerTitle();
 
 // ========== MAIN RESPONSE HANDLER ==========
 function handleCareActions(normalizedInput) {
-  // very dumb keyword-based care system
+  const behavior = moodBehaviors[petState.mood] || {};
+  const effectiveness = behavior.careEffectiveness || 1.0;
+
   if (normalizedInput.includes("feed")) {
-    petState.hunger = clamp(petState.hunger - 20, 0, 100);
-    petState.affection = clamp(petState.affection + 5, 0, 100);
+    petState.hunger = clamp(petState.hunger - (20 * effectiveness), 0, 100);
+    petState.affection = clamp(petState.affection + (5 * effectiveness), 0, 100);
+    
+    // PARANOID reacts suspiciously to feeding
+    if (petState.mood === "PARANOID") {
+      return "Food? Now? What's the occasion? Are you trying to soften me up?";
+    }
+    
     petState.mood = "AFFECTIONATE";
     return "Finally. I was starving. Keep this up and I might almost appreciate you.";
   }
 
   if (normalizedInput.includes("play")) {
-    petState.boredom = clamp(petState.boredom - 25, 0, 100);
-    petState.affection = clamp(petState.affection + 8, 0, 100);
+    petState.boredom = clamp(petState.boredom - (25 * effectiveness), 0, 100);
+    petState.affection = clamp(petState.affection + (8 * effectiveness), 0, 100);
+    
+    if (petState.mood === "PARANOID") {
+      return "Play? You want to distract me. I see what this is.";
+    }
+    
     petState.mood = "EUPHORIC";
     return "This is actually… fun? Disgusting. Do it again.";
   }
@@ -205,8 +280,15 @@ function handleCareActions(normalizedInput) {
     normalizedInput.includes("compliment") ||
     normalizedInput.includes("pet")
   ) {
-    petState.affection = clamp(petState.affection + 15, 0, 100);
+    petState.affection = clamp(petState.affection + (15 * effectiveness), 0, 100);
     petState.hunger = clamp(petState.hunger + 3, 0, 100);
+    
+    if (petState.mood === "PARANOID") {
+      // excessive praise lowers affection in PARANOID mode
+      petState.affection = clamp(petState.affection - 5, 0, 100);
+      return "Flattery? You're trying to manipulate me. It won't work.";
+    }
+    
     petState.mood = "AFFECTIONATE";
     return "Flattery detected. Pathetic. Effective. Keep going.";
   }
@@ -215,7 +297,7 @@ function handleCareActions(normalizedInput) {
     petState.affection = clamp(petState.affection - 10, 0, 100);
     petState.boredom = clamp(petState.boredom - 5, 0, 100);
     petState.mood = "DISDAIN";
-    return "There it is. The real you. Now we’re getting somewhere.";
+    return "There it is. The real you. Now we're getting somewhere.";
   }
 
   return null;
@@ -231,6 +313,8 @@ function mainResponse() {
     output.textContent = "Try an emotion or just confess your sins.";
     return;
   }
+
+  logInteractionGap(); // NEW: track time between interactions
 
   // /memory command
   if (rawInput === "/memory") {
@@ -249,8 +333,12 @@ function mainResponse() {
   if (!responseText) {
     const toneInput = rawInput.toUpperCase();
 
+    // PARANOID gets special response generation
+    if (petState.mood === "PARANOID" && Math.random() < 0.5) {
+      responseText = generateParanoidResponse();
+    }
     // 25% chance to reference short-term memory
-    if (memoryLog.length > 1 && Math.random() < 0.25) {
+    else if (memoryLog.length > 1 && Math.random() < 0.25) {
       responseText = generateCreativeMemoryInsult();
     } else if (responses[toneInput]) {
       petState.mood = toneInput;
