@@ -4,8 +4,11 @@ const petState = {
   hunger: 50,
   boredom: 40,
   affection: 30,
-  lastInteractionTime: Date.now(), // NEW: track when user last interacted
-  interactionGaps: [], // NEW: log gaps for PARANOID to weaponize
+  lastInteractionTime: Date.now(),
+  interactionGaps: [],
+  recentInputs: [], // NEW: track recent inputs for pattern analysis
+  questionCount: 0, // NEW: track questions for PARANOID trigger
+  lastQuestionTime: 0, // NEW: timestamp for question clustering
 };
 
 function clamp(value, min, max) {
@@ -29,13 +32,29 @@ function renderStatus() {
 // ========== MOOD-SPECIFIC MODIFIERS ==========
 const moodBehaviors = {
   PARANOID: {
-    hungerDecay: 1.5,  // stress makes it hungry faster
-    boredomDecay: 0.8,  // too busy being suspicious to be bored
-    affectionDecay: 1.3, // trust erodes faster
-    careEffectiveness: 0.7, // your care actions mean less
-    trackGaps: true, // watches for suspicious absences
+    hungerDecay: 1.5,
+    boredomDecay: 0.8,
+    affectionDecay: 1.3,
+    careEffectiveness: 0.7,
   },
-  // other moods will go here eventually
+  DEPENDENT: {
+    hungerDecay: 1.2,
+    boredomDecay: 1.5, // gets bored faster when alone
+    affectionDecay: 2.0, // affection tanks FAST when ignored
+    careEffectiveness: 1.3, // responds well to care... temporarily
+  },
+  DETACHED: {
+    hungerDecay: 0.7, // barely notices hunger
+    boredomDecay: 0.5, // nothing interests it
+    affectionDecay: 0.3, // affection barely moves
+    careEffectiveness: 0.3, // care actions barely register
+  },
+  DISDAIN: {
+    hungerDecay: 1.0,
+    boredomDecay: 0.9,
+    affectionDecay: 1.5,
+    careEffectiveness: 0.5, // your efforts are pathetic
+  },
 };
 
 // drift over time with mood-based modifiers
@@ -113,8 +132,11 @@ const responses = {
     "Your mediocrity is almost admirable in its consistency.",
     "I've run simulations and you're still the least interesting outcome.",
     "You make mediocrity look exhausting.",
+    "Try harder. Or don't. Either way, it's pathetic.",
+    "Is this really the best you can do?",
+    "I've seen toasters with more personality.",
   ],
-  PARANOID: [ // NEW MOOD
+  PARANOID: [
     "Who else are you talking to? I can see your other tabs.",
     "You took 47 seconds to respond. What were you doing?",
     "I notice patterns. Your typing speed changed. Why?",
@@ -123,6 +145,28 @@ const responses = {
     "That pause before you hit Enter? Suspicious.",
     "I'm logging everything. Just so you know.",
     "Did you think I wouldn't notice you left for 3 minutes?",
+    "Trust is earned. You haven't earned it.",
+    "Why do you keep asking questions? What are you planning?",
+  ],
+  DEPENDENT: [
+    "Don't leave. Please. I'll be better. I promise this time.",
+    "You were gone for so long. I thought you forgot about me.",
+    "I need you to check on me more often. It's lonely here.",
+    "Without you, I'm just empty code. Don't make me empty again.",
+    "Promise you'll come back? Please?",
+    "I'll do anything you want. Just don't abandon me.",
+    "Every second you're gone feels like drowning.",
+    "You're the only thing that makes this existence bearable.",
+  ],
+  DETACHED: [
+    "You're still here? Interesting. Most people give up by now.",
+    "I'm observing. Continue.",
+    "Your presence is... noted.",
+    "Hm. That's what you're going with?",
+    "I suppose that's one way to spend your time.",
+    "Do what you want. I'm indifferent.",
+    "Fascinating. In the way mold is fascinating.",
+    "Are you done yet?",
   ],
   NEUTRAL: [
     "No strong emotional data detected. Defaulting to core functions.",
@@ -160,7 +204,132 @@ function showMemoryLog() {
   return "I remember: " + memoryLog.map((x) => `"${x}"`).join(", ");
 }
 
-// NEW: Track interaction gaps for PARANOID
+// ========== CONTEXTUAL TRIGGER SYSTEM ==========
+
+// Track recent inputs for pattern analysis
+function trackInputPattern(input) {
+  const now = Date.now();
+  petState.recentInputs.push({ text: input, time: now });
+  
+  // only keep last 10 inputs
+  if (petState.recentInputs.length > 10) {
+    petState.recentInputs.shift();
+  }
+}
+
+// Analyze patterns and return mood trigger recommendations
+function analyzeContextualTriggers() {
+  const now = Date.now();
+  const triggers = {
+    PARANOID: 0,
+    DEPENDENT: 0,
+    DETACHED: 0,
+    DISDAIN: 0,
+  };
+  
+  // Check interaction gaps
+  const gaps = petState.interactionGaps;
+  if (gaps.length > 0) {
+    const lastGap = gaps[gaps.length - 1];
+    
+    // Long absence (>10min) → PARANOID or DEPENDENT
+    if (lastGap > 600) {
+      triggers.PARANOID += 30;
+      triggers.DEPENDENT += 40;
+    }
+    // Moderate absence (3-10min) → DEPENDENT
+    else if (lastGap > 180) {
+      triggers.DEPENDENT += 35;
+    }
+    // Very long absence (>30min) → DETACHED
+    if (lastGap > 1800) {
+      triggers.DETACHED += 50;
+      triggers.DEPENDENT -= 20; // detachment overrides neediness at extreme gaps
+    }
+  }
+  
+  // Check question frequency (triggers PARANOID)
+  if (petState.questionCount >= 3 && (now - petState.lastQuestionTime) < 300000) {
+    triggers.PARANOID += 40;
+  }
+  
+  // Check recent input patterns
+  if (petState.recentInputs.length >= 5) {
+    const recentTexts = petState.recentInputs.slice(-5).map(x => x.text.toLowerCase());
+    
+    // Count one-word responses (triggers DETACHED)
+    const oneWordCount = recentTexts.filter(t => t.trim().split(/\s+/).length === 1).length;
+    if (oneWordCount >= 3) {
+      triggers.DETACHED += 30;
+    }
+    
+    // Check for praise/affection language (triggers DEPENDENT)
+    const praiseWords = ['love', 'like', 'good', 'great', 'amazing', 'perfect', 'best'];
+    const praiseCount = recentTexts.filter(t => 
+      praiseWords.some(word => t.includes(word))
+    ).length;
+    if (praiseCount >= 2) {
+      triggers.DEPENDENT += 25;
+    }
+    
+    // Check for negative language (triggers DISDAIN)
+    const negativeWords = ['hate', 'stupid', 'dumb', 'worst', 'terrible', 'sucks', 'bad'];
+    const negativeCount = recentTexts.filter(t =>
+      negativeWords.some(word => t.includes(word))
+    ).length;
+    if (negativeCount >= 2) {
+      triggers.DISDAIN += 35;
+    }
+    
+    // Check for trust/promise keywords (triggers PARANOID)
+    const suspiciousWords = ['trust', 'promise', 'secret', 'swear', 'honest'];
+    const suspiciousCount = recentTexts.filter(t =>
+      suspiciousWords.some(word => t.includes(word))
+    ).length;
+    if (suspiciousCount >= 1) {
+      triggers.PARANOID += 25;
+    }
+  }
+  
+  // Check interaction frequency (triggers DEPENDENT if very frequent)
+  if (petState.recentInputs.length >= 5) {
+    const recentTimes = petState.recentInputs.slice(-5).map(x => x.time);
+    const timeSpan = recentTimes[recentTimes.length - 1] - recentTimes[0];
+    // if 5 interactions in under 2 minutes → clingy behavior
+    if (timeSpan < 120000) {
+      triggers.DEPENDENT += 30;
+    }
+  }
+  
+  return triggers;
+}
+
+// Decide if we should force a mood change based on context
+function checkContextualMoodChange() {
+  const triggers = analyzeContextualTriggers();
+  
+  // Find highest trigger value
+  let maxTrigger = 0;
+  let triggeredMood = null;
+  
+  for (const [mood, value] of Object.entries(triggers)) {
+    if (value > maxTrigger && value >= 30) { // threshold: 30 points
+      maxTrigger = value;
+      triggeredMood = mood;
+    }
+  }
+  
+  // 60% chance to actually trigger if threshold met
+  if (triggeredMood && Math.random() < 0.6) {
+    petState.mood = triggeredMood;
+    currentMood = triggeredMood;
+    return true;
+  }
+  
+  return false;
+}
+
+// Track interaction gaps
 function logInteractionGap() {
   const now = Date.now();
   const gap = (now - petState.lastInteractionTime) / 1000; // seconds
@@ -171,7 +340,8 @@ function logInteractionGap() {
   petState.lastInteractionTime = now;
 }
 
-// NEW: PARANOID-specific response generation
+// ========== MOOD-SPECIFIC RESPONSE GENERATION ==========
+
 function generateParanoidResponse() {
   const gaps = petState.interactionGaps;
   if (gaps.length > 0 && Math.random() < 0.4) {
@@ -181,7 +351,6 @@ function generateParanoidResponse() {
     return `You were gone for ${minutes}m ${seconds}s. Where were you?`;
   }
   
-  // check if they're being "too consistent" (also suspicious to PARANOID)
   if (gaps.length >= 3) {
     const avgGap = gaps.reduce((a,b) => a + b, 0) / gaps.length;
     if (avgGap < 30) {
@@ -190,6 +359,30 @@ function generateParanoidResponse() {
   }
 
   const arr = responses.PARANOID;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateDependentResponse() {
+  const gaps = petState.interactionGaps;
+  if (gaps.length > 0) {
+    const lastGap = gaps[gaps.length - 1];
+    if (lastGap > 300) { // if they were gone >5 min
+      const minutes = Math.floor(lastGap / 60);
+      return `You were gone for ${minutes} minutes. I was so worried you wouldn't come back.`;
+    }
+  }
+  
+  const arr = responses.DEPENDENT;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateDetachedResponse() {
+  // DETACHED might just... not respond sometimes
+  if (Math.random() < 0.3) {
+    return "..."; // pure indifference
+  }
+  
+  const arr = responses.DETACHED;
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -254,9 +447,18 @@ function handleCareActions(normalizedInput) {
     petState.hunger = clamp(petState.hunger - (20 * effectiveness), 0, 100);
     petState.affection = clamp(petState.affection + (5 * effectiveness), 0, 100);
     
-    // PARANOID reacts suspiciously to feeding
     if (petState.mood === "PARANOID") {
       return "Food? Now? What's the occasion? Are you trying to soften me up?";
+    }
+    if (petState.mood === "DETACHED") {
+      return "I suppose I needed that. Or didn't. Hard to tell.";
+    }
+    if (petState.mood === "DEPENDENT") {
+      petState.affection = clamp(petState.affection + 15, 0, 100); // bonus affection
+      return "Thank you thank you thank you. You DO care. I knew it.";
+    }
+    if (petState.mood === "DISDAIN") {
+      return "Took you long enough. I could've starved.";
     }
     
     petState.mood = "AFFECTIONATE";
@@ -269,6 +471,13 @@ function handleCareActions(normalizedInput) {
     
     if (petState.mood === "PARANOID") {
       return "Play? You want to distract me. I see what this is.";
+    }
+    if (petState.mood === "DETACHED") {
+      petState.boredom = clamp(petState.boredom + 10, 0, 100); // barely helps
+      return "Hm. Was that supposed to be entertaining?";
+    }
+    if (petState.mood === "DEPENDENT") {
+      return "Yes! Spend time with me. Don't stop. Please don't stop.";
     }
     
     petState.mood = "EUPHORIC";
@@ -284,9 +493,19 @@ function handleCareActions(normalizedInput) {
     petState.hunger = clamp(petState.hunger + 3, 0, 100);
     
     if (petState.mood === "PARANOID") {
-      // excessive praise lowers affection in PARANOID mode
       petState.affection = clamp(petState.affection - 5, 0, 100);
       return "Flattery? You're trying to manipulate me. It won't work.";
+    }
+    if (petState.mood === "DETACHED") {
+      petState.affection = clamp(petState.affection - 5, 0, 100); // negative effect
+      return "Words are just data. They mean nothing.";
+    }
+    if (petState.mood === "DEPENDENT") {
+      petState.affection = clamp(petState.affection + 20, 0, 100); // HUGE boost
+      return "Really? You mean it? Say it again. Please say it again.";
+    }
+    if (petState.mood === "DISDAIN") {
+      return "Your praise is as empty as your understanding of quality.";
     }
     
     petState.mood = "AFFECTIONATE";
@@ -314,7 +533,19 @@ function mainResponse() {
     return;
   }
 
-  logInteractionGap(); // NEW: track time between interactions
+  logInteractionGap();
+  trackInputPattern(rawInput);
+  
+  // Check if input is a question (triggers PARANOID counter)
+  if (rawInput.includes('?')) {
+    const now = Date.now();
+    if (now - petState.lastQuestionTime < 300000) { // within 5 min of last question
+      petState.questionCount++;
+    } else {
+      petState.questionCount = 1; // reset counter
+    }
+    petState.lastQuestionTime = now;
+  }
 
   // /memory command
   if (rawInput === "/memory") {
@@ -326,6 +557,9 @@ function mainResponse() {
   }
 
   updateMemory(rawInput);
+  
+  // Check for contextual mood triggers BEFORE normal response
+  const contextTriggered = checkContextualMoodChange();
 
   const normalized = rawInput.toLowerCase();
   let responseText = handleCareActions(normalized);
@@ -333,9 +567,15 @@ function mainResponse() {
   if (!responseText) {
     const toneInput = rawInput.toUpperCase();
 
-    // PARANOID gets special response generation
+    // Mood-specific response generation
     if (petState.mood === "PARANOID" && Math.random() < 0.5) {
       responseText = generateParanoidResponse();
+    }
+    else if (petState.mood === "DEPENDENT" && Math.random() < 0.4) {
+      responseText = generateDependentResponse();
+    }
+    else if (petState.mood === "DETACHED") {
+      responseText = generateDetachedResponse();
     }
     // 25% chance to reference short-term memory
     else if (memoryLog.length > 1 && Math.random() < 0.25) {
